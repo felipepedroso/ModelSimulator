@@ -1,10 +1,12 @@
 package com.pedroso.model;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -21,18 +23,34 @@ public class CanvasGrid extends SurfaceView implements Runnable ,SurfaceHolder.C
 	private int cellHeight;
 	private int marginX;
 	private int marginY;
-	private int backColor;
+	private int backColor = Color.BLACK;;
 	private int[][] colors;
 	
-	public CanvasGrid(Context context, int cellWidth, int cellHeight){
-		super(context);
-		this.cellWidth = cellWidth;
-		this.cellHeight = cellHeight;
-		this.backColor = Color.BLACK;
-		
+	public CanvasGrid(Context context){
+		super(context);		
 		getHolder().addCallback(this);
 	}
 	
+	public CanvasGrid(Context context, AttributeSet attrs){
+		super(context,attrs);
+		initCellDimensions(attrs);
+		getHolder().addCallback(this);
+	}
+	
+	public CanvasGrid(Context context, AttributeSet attrs, int defStyle){
+		super(context,attrs,defStyle);
+		initCellDimensions(attrs);
+		getHolder().addCallback(this);
+	}
+	
+	
+	private void initCellDimensions(AttributeSet attrs) {
+		TypedArray arr = getContext().obtainStyledAttributes(attrs, R.styleable.CanvasGrid);
+		
+		cellWidth = arr.getInt(R.styleable.CanvasGrid_cellWidth, 10);
+		cellHeight = arr.getInt(R.styleable.CanvasGrid_cellHeight, 10);
+	}
+
 	public void onSizeChanged(int w, int h, int oldw, int oldh){
 		initializeGrid();
 	}
@@ -62,22 +80,42 @@ public class CanvasGrid extends SurfaceView implements Runnable ,SurfaceHolder.C
 		
 		for (int i=0; i<rows; i++){
 			for (int j=0; j<columns; j++){
-				colors[i][j] = color;
+				setColor(color, i, j);
 			}
 		}
 	}
 	
 	public boolean onTouchEvent(MotionEvent event){
-		if(event.getAction() == MotionEvent.ACTION_DOWN){
-			return touchedSquare(event.getX(), event.getY(), Color.BLUE);
-		}else if(event.getAction() == MotionEvent.ACTION_UP){
-			return touchedSquare(event.getX(), event.getY(), Color.WHITE);
-		}
+		float touchedX = event.getX();
+		float touchedY = event.getY();
 		
+		int[] squareIndex = getSquareIndex(touchedX, touchedY);
+		
+		if(squareIndex != null){
+			int eventAction = event.getAction(); 
+			
+			switch (eventAction) {
+			case MotionEvent.ACTION_MOVE:
+				
+				break;
+			case MotionEvent.ACTION_DOWN:
+				
+				break;
+			case MotionEvent.ACTION_UP:
+				
+				break;
+	
+
+			default:
+				break;
+			}
+
+		}
+				
 		return false;
 	}
 
-	private boolean touchedSquare(float x, float y, int color)
+	private int[] getSquareIndex(float x, float y)
 	{
 		for (int i=0; i<rows; i++){
 			for (int j=0; j<columns; j++){
@@ -87,32 +125,40 @@ public class CanvasGrid extends SurfaceView implements Runnable ,SurfaceHolder.C
 				int bottom = top + cellHeight;
 
 				if(new Rect(left, top, right, bottom).contains((int)x,(int)y)){
-					colors[i][j] = color;
-					return true;
+					int[] coordinates = {i, j};
+					return coordinates;
 				}
 			}
 		}
 		
-		return false;
+		return null;
+	}
+	
+	public void setColor(int color, int x, int y){
+		if(x < rows && x >= 0 && y < columns && y>= 0){
+			colors[x][y] = color;
+		}
 	}
 	
 	public void draw(Canvas canvas){
-		Paint paint =  new Paint();
-		
-		paint.setStyle(Paint.Style.FILL);
-		
-		paint.setColor(backColor);
-		canvas.drawPaint(paint);
-		
-		for (int i=0; i<rows; i++){
-			for (int j=0; j<columns; j++){
-				float left = i*(cellWidth + 1) + marginX;
-				float top = j*(cellHeight + 1) + marginY;
-				float right = left + cellWidth;
-				float bottom = top + cellHeight;
-				
-				paint.setColor(colors[i][j]);
-				canvas.drawRect(left, top, right, bottom, paint);
+		if(canvas != null){
+			Paint paint =  new Paint();
+
+			paint.setStyle(Paint.Style.FILL);
+
+			paint.setColor(backColor);
+			canvas.drawPaint(paint);
+
+			for (int i=0; i<rows; i++){
+				for (int j=0; j<columns; j++){
+					float left = i*(cellWidth + 1) + marginX;
+					float top = j*(cellHeight + 1) + marginY;
+					float right = left + cellWidth;
+					float bottom = top + cellHeight;
+
+					paint.setColor(colors[i][j]);
+					canvas.drawRect(left, top, right, bottom, paint);
+				}
 			}
 		}
 	}
@@ -161,11 +207,9 @@ public class CanvasGrid extends SurfaceView implements Runnable ,SurfaceHolder.C
 
 	public void surfaceCreated(SurfaceHolder holder) {
 		start();
-		
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		stop();
 	}
-	
 }

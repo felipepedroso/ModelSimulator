@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<declare-styleable name="CanvasGrid">
+	    <attr name="cellWidth" format="integer" min="1"/>
+	    <attr name="cellHeight" format="integer" min="1"/>
+	</declare-styleable>    
+</resources>

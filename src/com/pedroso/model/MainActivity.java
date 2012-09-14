@@ -11,8 +11,8 @@ public class MainActivity extends Activity
 	{
         super.onCreate(savedInstanceState);
 		
-		CanvasGrid view = new CanvasGrid(this, 10, 10);
-        //setContentView(R.layout.main);
-		setContentView(view);
+
+        setContentView(R.layout.main);
+//		setContentView(view);
     }
 }
